@@ -69,6 +69,9 @@ This project extends the official [`agents-starter`](https://github.com/cloudfla
     ```sh
     npm run start
     ```
+
+  The project will now be live on http://localhost:5174
+
 ## 📖 Resources
 1. [Get an OpenAI API Key](https://platform.openai.com/docs/overview)
 2. [Setup Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/)

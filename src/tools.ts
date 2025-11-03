@@ -17,7 +17,6 @@ async function getMCPClient() {
 
   try {
     // Construct server URL with authentication
-    const apiKey = process.env.CANVAS_API_KEY || "";
     const profile = process.env.SMITHERY_PROFILE || "";
     const smitheryApiKey = process.env.SMITHERY_API_KEY || "";
     const url = new URL("https://server.smithery.ai/@aryankeluskar/canvas-mcp/mcp");
@@ -64,6 +63,7 @@ export const getAssignments = tool({
     return res;
   }
 });
+
 /**
  * Tool to interact with canvas MCP and get courses
  */
