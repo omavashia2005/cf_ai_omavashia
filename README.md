@@ -1,7 +1,7 @@
 # 🧠  Cloudflare Canvas Agent!
-An AI-powered chat agent built on **Cloudflare’s Agents Platform**, integrating the **Canvas LMS MCP server** to enable intelligent, context-aware interactions with academic course data. 
+An AI-powered chat agent built on **Cloudflare’s Agents Platform**, integrating the [**Canvas LMS MCP server**](https://github.com/aryankeluskar/canvas-mcp) to enable intelligent, context-aware interactions with academic course data. 
 
-This project extends the official [`agents-starter`](https://github.com/cloudflare/agents-starter) template with full **MCP integration**, **stateful workflows**, and **tool-driven AI reasoning**, deployable entirely on **Cloudflare Pages**.
+This project extends and modifies the official [`agents-starter`](https://github.com/cloudflare/agents-starter) template with full **MCP integration**, **stateful workflows**, and **tool-driven AI reasoning**, deployable entirely on **Cloudflare Pages**.
 
 #### Context via tool calling (MCP)
 ![App Screenshot](./assets/Screenshot%201.png)
