@@ -3,6 +3,12 @@ An AI-powered chat agent built on **Cloudflare’s Agents Platform**, integratin
 
 This project extends the official [`agents-starter`](https://github.com/cloudflare/agents-starter) template with full **MCP integration**, **stateful workflows**, and **tool-driven AI reasoning**, deployable entirely on **Cloudflare Pages**.
 
+#### Context via tool calling (MCP)
+![App Screenshot](./assets/Screenshot%201.png)
+
+#### Remembers conversations
+![App Screenshot](./assets/Screenshot%202.png)
+
 ## 🚀 Features
 
 * **Canvas LMS Integration (via MCP):**
