@@ -89,7 +89,7 @@ This project extends and modifies the official [`agents-starter`](https://github
     npm run start
     ```
 
-  The project will now be live on http://localhost:5174
+  The project will now be live _locally_ at http://localhost:5174
 
 ## 📖 Resources
 1. [Get an OpenAI API Key](https://platform.openai.com/docs/overview)
