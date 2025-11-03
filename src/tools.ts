@@ -4,130 +4,108 @@
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod/v3";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 
-import type { Chat } from "./server";
-import { getCurrentAgent } from "agents";
-import { scheduleSchema } from "agents/schedule";
+// Lazy initialization of MCP client
+let mcpClient: Client | null = null;
 
-/**
- * Weather information tool that requires human confirmation
- * When invoked, this will present a confirmation dialog to the user
- */
-const getWeatherInformation = tool({
-  description: "show the weather in a given city to the user",
-  inputSchema: z.object({ city: z.string() })
-  // Omitting execute function makes this tool require human confirmation
-});
+async function getMCPClient() {
+  if (mcpClient) {
+    return mcpClient;
+  }
 
-/**
- * Local time tool that executes automatically
- * Since it includes an execute function, it will run without user confirmation
- * This is suitable for low-risk operations that don't need oversight
- */
-const getLocalTime = tool({
-  description: "get the local time for a specified location",
-  inputSchema: z.object({ location: z.string() }),
-  execute: async ({ location }) => {
-    console.log(`Getting local time for ${location}`);
-    return "10am";
+  try {
+    // Construct server URL with authentication
+    const apiKey = process.env.CANVAS_API_KEY || "";
+    const profile = process.env.SMITHERY_PROFILE || "";
+    const smitheryApiKey = process.env.SMITHERY_API_KEY || "";
+    const url = new URL("https://server.smithery.ai/@aryankeluskar/canvas-mcp/mcp");
+    url.searchParams.set("api_key", smitheryApiKey);
+    url.searchParams.set("profile", profile);
+
+    const transport = new StreamableHTTPClientTransport(url);
+    
+    const client = new Client({
+      name: "My App",
+      version: "1.0.0", 
+      apiKey: smitheryApiKey,
+    });
+
+    await client.connect(transport);
+    mcpClient = client;
+    
+    console.log("MCP client connected successfully");
+    return client;
+  } catch (error) {
+    console.error("Failed to connect MCP client:", error);
+    throw new Error(`MCP connection failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+
+export const getAssignments = tool({
+  description: "Use this tool to retrieve all assignments for a specific Canvas course by course name. Provide the course name as input, and the tool will return a list of assignments associated with that course. This is useful for accessing assignment details, due dates, and other related information for a given course.",
+  inputSchema: z.object({
+    course_name: z.string(),
+  }),
+  execute: async (input) => {
+    const client = await getMCPClient();
+    
+    const response = await client.callTool({
+      name: "get_assignments_by_course_name",
+      arguments: {
+        course_name: input.course_name,
+      }
+    });
+    
+    const res = JSON.stringify(response);
+
+    return res;
   }
 });
-
-const scheduleTask = tool({
-  description: "A tool to schedule a task to be executed at a later time",
-  inputSchema: scheduleSchema,
-  execute: async ({ when, description }) => {
-    // we can now read the agent context from the ALS store
-    const { agent } = getCurrentAgent<Chat>();
-
-    function throwError(msg: string): string {
-      throw new Error(msg);
-    }
-    if (when.type === "no-schedule") {
-      return "Not a valid schedule input";
-    }
-    const input =
-      when.type === "scheduled"
-        ? when.date // scheduled
-        : when.type === "delayed"
-          ? when.delayInSeconds // delayed
-          : when.type === "cron"
-            ? when.cron // cron
-            : throwError("not a valid schedule input");
-    try {
-      agent!.schedule(input!, "executeTask", description);
-    } catch (error) {
-      console.error("error scheduling task", error);
-      return `Error scheduling task: ${error}`;
-    }
-    return `Task scheduled for type "${when.type}" : ${input}`;
-  }
-});
-
 /**
- * Tool to list all scheduled tasks
- * This executes automatically without requiring human confirmation
+ * Tool to interact with canvas MCP and get courses
  */
-const getScheduledTasks = tool({
-  description: "List all tasks that have been scheduled",
+export const getCourses = tool({
+  description: "Use this tool to retrieve all available Canvas courses for the current user. This tool returns a dictionary mapping course names to their corresponding IDs. Use this when you need to find course IDs based on names, display all available courses, or when needing to access any course-related information",
   inputSchema: z.object({}),
   execute: async () => {
-    const { agent } = getCurrentAgent<Chat>();
 
-    try {
-      const tasks = agent!.getSchedules();
-      if (!tasks || tasks.length === 0) {
-        return "No scheduled tasks found.";
+    const client = await getMCPClient();
+    
+    const response = await client.callTool({
+      name: "get_courses",
+      arguments: {
       }
-      return tasks;
-    } catch (error) {
-      console.error("Error listing scheduled tasks", error);
-      return `Error listing scheduled tasks: ${error}`;
-    }
-  }
-});
+    });
+    
+    const res = JSON.stringify(response);
+    console.log("get_courses response:", res);
+    
+    const parsedOuter = JSON.parse(res);         
+    const innerText = parsedOuter.content[0].text;        
+    const coursesObj = JSON.parse(innerText);             
+    const courseNames = Object.keys(coursesObj);          
 
-/**
- * Tool to cancel a scheduled task by its ID
- * This executes automatically without requiring human confirmation
- */
-const cancelScheduledTask = tool({
-  description: "Cancel a scheduled task using its ID",
-  inputSchema: z.object({
-    taskId: z.string().describe("The ID of the task to cancel")
-  }),
-  execute: async ({ taskId }) => {
-    const { agent } = getCurrentAgent<Chat>();
-    try {
-      await agent!.cancelSchedule(taskId);
-      return `Task ${taskId} has been successfully canceled.`;
-    } catch (error) {
-      console.error("Error canceling scheduled task", error);
-      return `Error canceling task ${taskId}: ${error}`;
-    }
+    const joinedCourses = courseNames.join('\n');
+
+    console.log(joinedCourses);
+
+    return joinedCourses;
   }
 });
 
 /**
  * Export all available tools
- * These will be provided to the AI model to describe available capabilities
  */
 export const tools = {
-  getWeatherInformation,
-  getLocalTime,
-  scheduleTask,
-  getScheduledTasks,
-  cancelScheduledTask
+  getCourses,
+  getAssignments
 } satisfies ToolSet;
 
 /**
  * Implementation of confirmation-required tools
- * This object contains the actual logic for tools that need human approval
- * Each function here corresponds to a tool above that doesn't have an execute function
  */
 export const executions = {
-  getWeatherInformation: async ({ city }: { city: string }) => {
-    console.log(`Getting weather information for ${city}`);
-    return `The weather in ${city} is sunny`;
-  }
 };
