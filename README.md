@@ -94,7 +94,10 @@ This project extends and modifies the official [`agents-starter`](https://github
 ## 📖 Resources
 1. [Get an OpenAI API Key](https://platform.openai.com/docs/overview)
 2. [Setup Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/)
-3. [Get a Canvas API Key](https://community.canvaslms.com/t5/Admin-Guide/How-do-I-add-a-developer-API-key-for-an-account/ta-p/259)
+3. Canvas Student API Key:
+
+    Account > Settings > Approved Integrations > New Access Token
+
 4. Go to [this mcp server](https://smithery.ai/server/@aryankeluskar/canvas-mcp). 
     * Sign Up/Login to a Smithery account
     * In "configure", add your Canvas API key from step 3
