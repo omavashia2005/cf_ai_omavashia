@@ -103,3 +103,14 @@ This project extends and modifies the official [`agents-starter`](https://github
     * In "configure", add your Canvas API key from step 3
 5. [Get your Smithery API key](https://smithery.ai/account/api-keys)
 6. [Get your Smithery MCP Profile](https://smithery.ai/account/profiles)
+
+## Project Structure
+```
+cf_ai_canvas_agent/
+├── src/                  # Core source code
+│   ├── tools.ts          # MCP tools and API integrations
+│   ├── server.ts         # Worker entrypoint (Cloudflare)
+│   ├── app.tsx           # Frontend (React)
+├── README.md
+└── PROMPTS.md            # Prompts used to generate AI code
+```
